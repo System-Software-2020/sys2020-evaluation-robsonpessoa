@@ -1,4 +1,5 @@
 	;; Program ex1.asm
+	;; With x86 cdecl ABI
 	;; nasm -f elf32 ex1.asm -o ex1.o
 	;; ld -m elf_i386 ex1.o -o ex1
 	 
@@ -22,24 +23,30 @@ _start:
 main:
         push ebp                
         mov ebp, esp
-        push 6                 
+        push 6
         push p1
         push 1
         call write
-        add esp, 8
+        add esp, 12             ; fixes the size of the stack to clean (3x4 vars)
         mov eax, 0              
         mov esp, ebp            
         pop ebp
         ret                  
 
 write:
-        push ebp                
+        push ebp ; prologue
         mov ebp, esp
-        mov ebx, [esp+8]                 
-        mov ecx, [esp+12]                 
-        mov edx, [esp+16]                 
+
+        push ebx ; saves the value of the ebx in the stack before using it
+
+        mov ebx, [esp+12]       ; updates the offsets because now there is new
+        mov ecx, [esp+16]       ; data in the stack (the ebx)
+        mov edx, [esp+20]
         mov eax, 4              
-        int 0x80                
-        mov esp, ebp            
+        int 0x80               ; syscall write (4) in x86
+
+        pop ebx  ; takes the previous value of ebx back from the stack
+
+        mov esp, ebp ; epilogue
         pop ebp
         ret
