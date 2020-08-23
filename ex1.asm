@@ -6,7 +6,7 @@
 	
         global _start
         global main
-        global write
+        extern write
         
         section .data
         p1 db 0x48, 0x65, 0x6c
@@ -30,23 +30,5 @@ main:
         add esp, 12             ; fixes the size of the stack to clean (3x4 vars)
         mov eax, 0              
         mov esp, ebp            
-        pop ebp
-        ret                  
-
-write:
-        push ebp ; prologue
-        mov ebp, esp
-
-        push ebx ; saves the value of the ebx in the stack before using it
-
-        mov ebx, [esp+12]       ; updates the offsets because now there is new
-        mov ecx, [esp+16]       ; data in the stack (the ebx)
-        mov edx, [esp+20]
-        mov eax, 4              
-        int 0x80               ; syscall write (4) in x86
-
-        pop ebx  ; takes the previous value of ebx back from the stack
-
-        mov esp, ebp ; epilogue
         pop ebp
         ret
